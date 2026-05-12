@@ -1,10 +1,7 @@
 name: build
 on:
   workflow_dispatch:
-  release: {types: [published]}
-  push:
-    branches: [main]
-    tags: ['**']
+  push: {branches: [main]}
   pull_request: {branches: [main]}
 jobs:
   conda:
@@ -14,12 +11,12 @@ jobs:
     - uses: actions/checkout@v6
     - uses: prefix-dev/rattler-build-action@v0.2.37
       with: {recipe-path: recipe.yaml}
-    - if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags')
+    - if: github.ref == 'refs/heads/main'
       name: conda upload -c ccpi
       run: >
         rattler-build upload anaconda ./output/*/*.conda -f
-        -o ccpi -c ${{ startsWith(github.ref, 'refs/tags') && 'main' || 'dev' }} -a ${{ secrets.CCPI_CONDA_TOKEN }}
-    - if: startsWith(github.ref, 'refs/tags')
+        -o ccpi -c main -a ${{ secrets.CCPI_CONDA_TOKEN }}
+    - if: github.ref == 'refs/heads/main'
       name: conda upload -c tomography.stfc.ac.uk/conda
       working-directory: output
       run: |
